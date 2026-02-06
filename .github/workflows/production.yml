@@ -28,4 +28,6 @@ jobs:
             **/.git*
             **/.git*/**
             **/.github/**
+            README.md
+            LICENSE.md
           server-dir: subdomains/mtglea-booster-generator/
