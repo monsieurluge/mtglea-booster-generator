@@ -1,0 +1,130 @@
+html {
+    background-color: #313131;
+    color: #e0e0e0;
+}
+
+header {
+    margin-bottom: 30px;
+}
+
+h1 {
+    margin: 0;
+}
+
+#subtitle {
+    margin: 0;
+    font-size: 0.9em;
+    color: #c0c0c0;
+}
+
+#actions {
+    margin-bottom: 30px;
+}
+
+#boosters {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.booster {
+    max-width: 300px;
+}
+
+.booster ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    list-style-type: none;
+}
+
+.booster li {
+    position: relative;
+    margin-left: 10px;
+    padding-left: 1em;
+    padding-right: 1em;
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    border-radius: 0px 6px 6px 0;
+    background-color: #3a3a3a;
+}
+
+.booster li.color-white::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+}
+
+.booster li.color-blue::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #3b82f6;
+    border-radius: 2px;
+}
+
+.booster li.color-black::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #262524;
+    border-radius: 2px;
+}
+
+.booster li.color-red::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #c83625;
+    border-radius: 2px;
+}
+
+.booster li.color-green::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #2aa043;
+    border-radius: 2px;
+}
+
+.booster li.color-artifact::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #855d40;
+    border-radius: 2px;
+}
+
+.booster li.color-land::before {
+    content: "";
+    height: 100%;
+    width: 8px;
+    position: absolute;
+    left: -10px;
+    top: 0;
+    background-color: #b29b6f;
+    border-radius: 2px;
+}
