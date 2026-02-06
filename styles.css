@@ -3,6 +3,11 @@ html {
     color: #e0e0e0;
 }
 
+article {
+    width: 300px;
+    margin: 0 auto;
+}
+
 header {
     margin-bottom: 30px;
 }
