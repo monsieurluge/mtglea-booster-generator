@@ -1,3 +1,19 @@
+@font-face {
+    font-family: "mediaeval";
+    font-style: normal;
+    font-weight: 400;
+    src:
+        url("Goudy Mediaeval Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "mediaeval-demibold";
+    font-style: normal;
+    font-weight: 700;
+    src:
+        url("Goudy Mediaeval DemiBold.ttf") format("truetype");
+}
+
 html {
     background-color: #313131;
     color: #e0e0e0;
@@ -48,88 +64,52 @@ h1 {
 
 .booster li {
     position: relative;
-    margin-left: 10px;
-    padding-left: 1em;
+    padding-left: 1.5em;
     padding-right: 1em;
     padding-top: 0.3em;
     padding-bottom: 0.3em;
-    border-radius: 0px 6px 6px 0;
-    background-color: #3a3a3a;
+    color: #b1a89b;
+    font-family: mediaeval, Times, serif;
+    text-shadow: 1px 1px #040404;
+    border-radius: 6px;
+    background-color: #393837;
+}
+
+.booster li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 8px;
+    border-radius: 6px 2px 2px 6px;
+    background-color: #e8e6df;
 }
 
 .booster li.color-white::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
-    background-color: #e0e0e0;
-    border-radius: 2px;
+    background-color: #e8e6df;
 }
 
 .booster li.color-blue::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #3b82f6;
-    border-radius: 2px;
 }
 
 .booster li.color-black::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #262524;
-    border-radius: 2px;
 }
 
 .booster li.color-red::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #c83625;
-    border-radius: 2px;
 }
 
 .booster li.color-green::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #2aa043;
-    border-radius: 2px;
 }
 
 .booster li.color-artifact::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #855d40;
-    border-radius: 2px;
 }
 
 .booster li.color-land::before {
-    content: "";
-    height: 100%;
-    width: 8px;
-    position: absolute;
-    left: -10px;
-    top: 0;
     background-color: #b29b6f;
-    border-radius: 2px;
 }
