@@ -60,7 +60,7 @@ h1 {
     background-color: #040404;
 }
 
-.card-content {
+.card-box {
     padding: 2px;
     display: flex;
     flex-direction: row;

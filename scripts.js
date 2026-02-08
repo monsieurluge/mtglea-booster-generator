@@ -124,24 +124,16 @@ function createBoosterElement(cards) {
     return boosterEl
 }
 
-function createCardElement({ color, name }) {
-    const nameEl = document.createElement('p')
-    nameEl.classList.add('card-name')
+function createCardElement({ color, cost, name }) {
+    const template = document.querySelector('#card-template')
+    const clone = document.importNode(template.content, true)
+    let boxEl = clone.querySelector('.card-box')
+    boxEl.classList.add(`color-${color}`)
+    let costEl = clone.querySelector('.card-cost')
+    costEl.textContent = cost
+    let nameEl = clone.querySelector('.card-name')
     nameEl.textContent = name
-
-    const costEl = document.createElement('p')
-    costEl.classList.add('card-cost', 'mana', 's0')
-
-    const boxEl = document.createElement('div')
-    boxEl.classList.add('card-content', `color-${color}`)
-    boxEl.appendChild(nameEl)
-    boxEl.appendChild(costEl)
-
-    const cardEl = document.createElement('li')
-    cardEl.classList.add('card')
-    cardEl.appendChild(boxEl)
-
-    return cardEl
+    return clone
 }
 
 function set() {
