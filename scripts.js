@@ -127,13 +127,26 @@ function createBoosterElement(cards) {
 function createCardElement({ color, cost, name }) {
     const template = document.querySelector('#card-template')
     const clone = document.importNode(template.content, true)
-    let boxEl = clone.querySelector('.card-box')
+    const boxEl = clone.querySelector('.card-box')
     boxEl.classList.add(`color-${color}`)
-    let costEl = clone.querySelector('.card-cost')
-    costEl.textContent = cost
-    let nameEl = clone.querySelector('.card-name')
+    const costEl = clone.querySelector('.card-cost')
+    createManaSymbolElements(cost).forEach(symbolEl => costEl.appendChild(symbolEl))
+    const nameEl = clone.querySelector('.card-name')
     nameEl.textContent = name
     return clone
+}
+
+function createManaSymbolElements(cost) {
+    const regex = /{([^}]+)}/g
+    return [...cost.matchAll(regex)].map(match => createManaSymbolElement(match[1]))
+}
+
+function createManaSymbolElement(symbol) {
+    const template = document.querySelector('#mana-symbol')
+    const clone = document.importNode(template.content, true)
+    const symbolEl = clone.querySelector('.mana-symbol')
+    symbolEl.classList.add(`s${symbol.toLowerCase()}`)
+    return symbolEl
 }
 
 function set() {
