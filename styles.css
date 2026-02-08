@@ -5,13 +5,6 @@
     src: url('Goudy Mediaeval Regular.ttf') format('truetype');
 }
 
-@font-face {
-    font-family: 'mediaeval-demibold';
-    font-style: normal;
-    font-weight: 700;
-    src: url('Goudy Mediaeval DemiBold.ttf') format('truetype');
-}
-
 html {
     background-color: #313131;
     color: #e0e0e0;
