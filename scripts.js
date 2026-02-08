@@ -1,3 +1,5 @@
+window.addEventListener('DOMContentLoaded', generateBoosters)
+
 const domElements = {
     boosters: document.getElementById('boosters'),
     perBoosterCardcount: document.getElementById('booster-count'),
