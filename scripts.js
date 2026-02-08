@@ -345,7 +345,7 @@ function set() {
         { name: 'Hurricane', type: 'sorcery', rarity: 'uncommon', color: 'green', cost: '{X}{G}' },
         { name: 'Ice Storm', type: 'sorcery', rarity: 'uncommon', color: 'green', cost: '{2}{G}' },
         { name: 'Instill Energy', type: 'enchantment', rarity: 'uncommon', color: 'green', cost: '{G}' },
-        { name: 'Ironroot Treefolk', type: 'creature', rarity: 'common', color: 'green', cost: '4G' },
+        { name: 'Ironroot Treefolk', type: 'creature', rarity: 'common', color: 'green', cost: '{4}{G}' },
         { name: 'Kudzu', type: 'enchantment', rarity: 'rare', color: 'green', cost: '{1}{G}{G}' },
         { name: 'Ley Druid', type: 'creature', rarity: 'uncommon', color: 'green', cost: '{2}{G}' },
         { name: 'Lifeforce', type: 'enchantment', rarity: 'uncommon', color: 'green', cost: '{G}{G}' },
