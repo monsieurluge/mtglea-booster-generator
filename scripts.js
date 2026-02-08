@@ -13,7 +13,7 @@ const boosterStats = {
         red: 1,
         green: 1,
         artifact: 0.8,
-        land: 0.7
+        land: 0.7,
     },
     rarityDistribution: {
         common: 11,
