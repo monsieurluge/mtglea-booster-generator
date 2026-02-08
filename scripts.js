@@ -113,19 +113,26 @@ function selectCard({ allCards, colorWeights, totalWeight, targetRarity }) {
 
 function createBoosterElement(cards) {
     const boosterEl = document.createElement('div')
-    boosterEl.classList.add('booster')
-
     const listEl = document.createElement('ul')
+    boosterEl.classList.add('booster')
     boosterEl.appendChild(listEl)
-
     cards.forEach(card => {
-        const cardEl = document.createElement('li')
-        cardEl.classList.add(`color-${card.color}`, `rarity-${card.rarity}`)
-        cardEl.textContent = card.name
-        listEl.appendChild(cardEl)
+        listEl.appendChild(createCardElement({ ...card }))
     })
-
     return boosterEl
+}
+
+function createCardElement({ color, name }) {
+    const cardEl = document.createElement('li')
+    const contentEl = document.createElement('div')
+    const nameEl = document.createElement('p')
+    contentEl.appendChild(nameEl)
+    cardEl.appendChild(contentEl)
+    cardEl.classList.add('card')
+    contentEl.classList.add('card-content', `color-${color}`)
+    nameEl.classList.add('card-name')
+    nameEl.textContent = name
+    return cardEl
 }
 
 function set() {
