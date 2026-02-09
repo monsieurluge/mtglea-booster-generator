@@ -2,7 +2,7 @@ window.addEventListener('DOMContentLoaded', generateBoosters)
 
 const domElements = {
     boosters: document.getElementById('boosters'),
-    perBoosterCardcount: document.getElementById('booster-count'),
+    boostersCount: document.getElementById('booster-count'),
 }
 
 const maxAttempts = 5
@@ -26,7 +26,7 @@ const boosterStats = {
 
 function generateBoosters() {
     const allCards = set()
-    const count = parseInt(domElements.perBoosterCardcount.value, 10) || 1
+    const count = parseInt(domElements.boostersCount.value, 10) || 3
     const boosters = []
 
     for (let i = 0; i < count; i++) {
