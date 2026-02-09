@@ -5,34 +5,97 @@ const domElements = {
     boostersCount: document.getElementById('booster-count'),
 }
 
-const maxAttempts = 5
+const generator = BoosterGenerator({
+    cardsList: set(),
+    stats: {
+        colorDistribution: {
+            white: 1,
+            blue: 1,
+            black: 1,
+            red: 1,
+            green: 1,
+            artifact: 0.8,
+            land: 0.7,
+        },
+        rarityDistribution: {
+            common: 11,
+            uncommon: 3,
+            rare: 1,
+        },
+    },
+})
 
-const boosterStats = {
-    colorDistribution: {
-        white: 1,
-        blue: 1,
-        black: 1,
-        red: 1,
-        green: 1,
-        artifact: 0.8,
-        land: 0.7,
-    },
-    rarityDistribution: {
-        common: 11,
-        uncommon: 3,
-        rare: 1,
-    },
+function BoosterGenerator({ cardsList, stats }) {
+    const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
+    const colorWeights = Object.values(stats.colorDistribution)
+    const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
+    const maxAttempts = 5
+
+    function generate() {
+        const commons = selectCards({
+            pool: cardsList,
+            targetRarity: 'common',
+            total: stats.rarityDistribution.common,
+        })
+        const uncommons = selectCards({
+            pool: cardsList,
+            targetRarity: 'uncommon',
+            total: stats.rarityDistribution.uncommon,
+        })
+        const rares = selectCards({
+            pool: cardsList,
+            targetRarity: 'rare',
+            total: stats.rarityDistribution.rare,
+        })
+        return [...commons, ...uncommons, ...rares]
+    }
+
+    function selectCards({ pool, targetRarity, total }) {
+        let cards = []
+        for (let i = 0; i < total; i++) {
+            const card = selectCard({
+                pool,
+                colorWeights,
+                totalWeight,
+                targetRarity,
+            })
+            cards.push(card)
+        }
+        return cards
+    }
+
+    function selectCard({ pool, targetRarity }) {
+        let attempt = 0
+        while (attempt < maxAttempts) {
+            attempt += 1
+            const rand = Math.random() * totalWeight
+            let cumulativeWeight = 0
+            let selectedColor
+            for (let i = 0; i < colors.length; i++) {
+                cumulativeWeight += colorWeights[i]
+                if (rand < cumulativeWeight) {
+                    selectedColor = colors[i]
+                    break
+                }
+            }
+            const filteredCards = pool.filter(card => card.rarity === targetRarity && card.color === selectedColor)
+            const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
+            if (selectedCard) return selectedCard
+        }
+        throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
+    }
+
+    return {
+        generate,
+    }
 }
 
 function generateBoosters() {
-    const allCards = set()
     const count = parseInt(domElements.boostersCount.value, 10) || 3
     const boosters = []
-
     for (let i = 0; i < count; i++) {
-        boosters.push(generateBooster(allCards))
+        boosters.push(generator.generate())
     }
-
     domElements.boosters.innerHTML = ''
     boosters.forEach(booster => {
         const element = createBoosterElement(booster)
@@ -40,87 +103,14 @@ function generateBoosters() {
     })
 }
 
-function generateBooster(allCards) {
-    const colorWeights = Object.values(boosterStats.colorDistribution)
-    const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
-
-    const commons = selectCards({
-        allCards,
-        colorWeights,
-        targetRarity: 'common',
-        total: boosterStats.rarityDistribution.common,
-        totalWeight,
-    })
-
-    const uncommons = selectCards({
-        allCards,
-        colorWeights,
-        targetRarity: 'uncommon',
-        total: boosterStats.rarityDistribution.uncommon,
-        totalWeight,
-    })
-
-    const rares = selectCards({
-        allCards,
-        colorWeights,
-        targetRarity: 'rare',
-        total: boosterStats.rarityDistribution.rare,
-        totalWeight,
-    })
-
-    return [...commons, ...uncommons, ...rares]
-}
-
-function selectCards({ allCards, colorWeights, totalWeight, total, targetRarity }) {
-    let cards = []
-    for (let i = 0; i < total; i++) {
-        const card = selectCard({
-            allCards,
-            colorWeights,
-            totalWeight,
-            targetRarity,
-        })
-        cards.push(card)
-    }
-    return cards
-}
-
-function selectCard({ allCards, colorWeights, totalWeight, targetRarity }) {
-    const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
-    let attempt = 0
-
-    while (attempt < maxAttempts) {
-        attempt += 1
-
-        const rand = Math.random() * totalWeight
-        let cumulativeWeight = 0
-        let selectedColor
-        for (let i = 0; i < colors.length; i++) {
-            cumulativeWeight += colorWeights[i]
-            if (rand < cumulativeWeight) {
-                selectedColor = colors[i]
-                break
-            }
-        }
-        const filteredCards = allCards.filter(card => card.rarity === targetRarity && card.color === selectedColor)
-        const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
-
-        if (selectedCard) return selectedCard
-    }
-
-    throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
-}
-
 function createBoosterElement(cards) {
     const listEl = document.createElement('ul')
     cards.forEach(card => {
         listEl.appendChild(createCardElement({ ...card }))
     })
-
     const boosterEl = document.createElement('div')
     boosterEl.classList.add('booster')
     boosterEl.appendChild(listEl)
-
     return boosterEl
 }
 
