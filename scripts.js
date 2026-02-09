@@ -7,6 +7,7 @@ const domElements = {
 
 const generator = BoosterGenerator({
     cardsList: set(),
+    cardSelector: CardSelector({ maxAttempts: 5 }),
     stats: {
         colorDistribution: {
             white: 1,
@@ -25,11 +26,38 @@ const generator = BoosterGenerator({
     },
 })
 
-function BoosterGenerator({ cardsList, stats }) {
+function CardSelector({ maxAttempts }) {
     const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
+
+    function select({ pool, colorWeights, totalWeight, targetRarity }) {
+        let attempt = 0
+        while (attempt < maxAttempts) {
+            attempt += 1
+            const rand = Math.random() * totalWeight
+            let cumulativeWeight = 0
+            let selectedColor
+            for (let i = 0; i < colors.length; i++) {
+                cumulativeWeight += colorWeights[i]
+                if (rand < cumulativeWeight) {
+                    selectedColor = colors[i]
+                    break
+                }
+            }
+            const filteredCards = pool.filter(card => card.rarity === targetRarity && card.color === selectedColor)
+            const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
+            if (selectedCard) return selectedCard
+        }
+        throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
+    }
+
+    return Object.freeze({
+        select,
+    })
+}
+
+function BoosterGenerator({ cardsList, cardSelector, stats }) {
     const colorWeights = Object.values(stats.colorDistribution)
     const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
-    const maxAttempts = 5
 
     function generate() {
         const commons = selectCards({
@@ -53,7 +81,7 @@ function BoosterGenerator({ cardsList, stats }) {
     function selectCards({ pool, targetRarity, total }) {
         let cards = []
         for (let i = 0; i < total; i++) {
-            const card = selectCard({
+            const card = cardSelector.select({
                 pool,
                 colorWeights,
                 totalWeight,
@@ -64,30 +92,9 @@ function BoosterGenerator({ cardsList, stats }) {
         return cards
     }
 
-    function selectCard({ pool, targetRarity }) {
-        let attempt = 0
-        while (attempt < maxAttempts) {
-            attempt += 1
-            const rand = Math.random() * totalWeight
-            let cumulativeWeight = 0
-            let selectedColor
-            for (let i = 0; i < colors.length; i++) {
-                cumulativeWeight += colorWeights[i]
-                if (rand < cumulativeWeight) {
-                    selectedColor = colors[i]
-                    break
-                }
-            }
-            const filteredCards = pool.filter(card => card.rarity === targetRarity && card.color === selectedColor)
-            const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
-            if (selectedCard) return selectedCard
-        }
-        throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
-    }
-
-    return {
+    return Object.freeze({
         generate,
-    }
+    })
 }
 
 function generateBoosters() {
