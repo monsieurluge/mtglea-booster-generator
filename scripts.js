@@ -1,4 +1,4 @@
-window.addEventListener('DOMContentLoaded', generateBoosters)
+window.addEventListener('DOMContentLoaded', generateAlphaBoosters)
 
 const domElements = {
     boosters: document.getElementById('boosters'),
@@ -6,13 +6,13 @@ const domElements = {
 }
 
 const myCardsCollection = CardsCollection({
-    set: set(),
+    set: alphaSet(),
 })
 
-const generator = BoosterGenerator({
-    cardSelector: CardSelector({
+const alphaBoosterGenerator = BoosterGenerator({
+    cardSelector: AlphaCardSelector({
         collection: myCardsCollection,
-        maxAttempts: 5,
+        maxAttempts: 10,
     }),
     stats: {
         colorDistribution: {
@@ -70,7 +70,7 @@ function BoosterGenerator({ cardSelector, stats }) {
     })
 }
 
-function CardSelector({ collection, maxAttempts }) {
+function AlphaCardSelector({ collection, maxAttempts }) {
     const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
 
     function select({ colorWeights, totalWeight, targetRarity }) {
@@ -109,11 +109,11 @@ function CardsCollection({ set }) {
     })
 }
 
-function generateBoosters() {
+function generateAlphaBoosters() {
     const count = parseInt(domElements.boostersCount.value, 10) || 3
     const boosters = []
     for (let i = 0; i < count; i++) {
-        boosters.push(generator.generate())
+        boosters.push(alphaBoosterGenerator.generate())
     }
     domElements.boosters.innerHTML = ''
     boosters.forEach(booster => {
@@ -158,7 +158,7 @@ function createManaSymbolElement(symbol) {
     return symbolEl
 }
 
-function set() {
+function alphaSet() {
     return [
         { name: 'Animate Wall', type: 'enchantment', rarity: 'rare', color: 'white', cost: '{W}' },
         { name: 'Armageddon', type: 'sorcery', rarity: 'rare', color: 'white', cost: '{3}{W}' },
