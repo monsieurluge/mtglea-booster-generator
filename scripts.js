@@ -87,9 +87,8 @@ function AlphaCardSelector({ collection, maxAttempts }) {
                     break
                 }
             }
-            const filteredCards = collection.pick(card => card.rarity === targetRarity && card.color === selectedColor)
-            const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
-            if (selectedCard) return selectedCard
+            const card = collection.pickAtRandom(card => card.rarity === targetRarity && card.color === selectedColor)
+            if (card) return card
         }
         throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
     }
@@ -100,12 +99,13 @@ function AlphaCardSelector({ collection, maxAttempts }) {
 }
 
 function CardsCollection({ set }) {
-    function pick(constraint) {
-        return set.filter(constraint)
+    function pickAtRandom(constraint) {
+        const cards = set.filter(constraint)
+        return cards[Math.floor(Math.random() * cards.length)]
     }
 
     return Object.freeze({
-        pick,
+        pickAtRandom,
     })
 }
 
