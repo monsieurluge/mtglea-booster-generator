@@ -5,9 +5,15 @@ const domElements = {
     boostersCount: document.getElementById('booster-count'),
 }
 
+const myCardsCollection = CardsCollection({
+    set: set(),
+})
+
 const generator = BoosterGenerator({
-    cardsList: set(),
-    cardSelector: CardSelector({ maxAttempts: 5 }),
+    cardSelector: CardSelector({
+        collection: myCardsCollection,
+        maxAttempts: 5,
+    }),
     stats: {
         colorDistribution: {
             white: 1,
@@ -26,10 +32,48 @@ const generator = BoosterGenerator({
     },
 })
 
-function CardSelector({ maxAttempts }) {
+function BoosterGenerator({ cardSelector, stats }) {
+    const colorWeights = Object.values(stats.colorDistribution)
+    const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
+
+    function generate() {
+        const commons = selectCards({
+            targetRarity: 'common',
+            total: stats.rarityDistribution.common,
+        })
+        const uncommons = selectCards({
+            targetRarity: 'uncommon',
+            total: stats.rarityDistribution.uncommon,
+        })
+        const rares = selectCards({
+            targetRarity: 'rare',
+            total: stats.rarityDistribution.rare,
+        })
+        return [...commons, ...uncommons, ...rares]
+    }
+
+    function selectCards({ targetRarity, total }) {
+        let cards = []
+        for (let i = 0; i < total; i++) {
+            const card = cardSelector.select({
+                colorWeights,
+                totalWeight,
+                targetRarity,
+            })
+            cards.push(card)
+        }
+        return cards
+    }
+
+    return Object.freeze({
+        generate,
+    })
+}
+
+function CardSelector({ collection, maxAttempts }) {
     const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
 
-    function select({ pool, colorWeights, totalWeight, targetRarity }) {
+    function select({ colorWeights, totalWeight, targetRarity }) {
         let attempt = 0
         while (attempt < maxAttempts) {
             attempt += 1
@@ -43,7 +87,7 @@ function CardSelector({ maxAttempts }) {
                     break
                 }
             }
-            const filteredCards = pool.filter(card => card.rarity === targetRarity && card.color === selectedColor)
+            const filteredCards = collection.pick(card => card.rarity === targetRarity && card.color === selectedColor)
             const selectedCard = filteredCards[Math.floor(Math.random() * filteredCards.length)]
             if (selectedCard) return selectedCard
         }
@@ -55,45 +99,13 @@ function CardSelector({ maxAttempts }) {
     })
 }
 
-function BoosterGenerator({ cardsList, cardSelector, stats }) {
-    const colorWeights = Object.values(stats.colorDistribution)
-    const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
-
-    function generate() {
-        const commons = selectCards({
-            pool: cardsList,
-            targetRarity: 'common',
-            total: stats.rarityDistribution.common,
-        })
-        const uncommons = selectCards({
-            pool: cardsList,
-            targetRarity: 'uncommon',
-            total: stats.rarityDistribution.uncommon,
-        })
-        const rares = selectCards({
-            pool: cardsList,
-            targetRarity: 'rare',
-            total: stats.rarityDistribution.rare,
-        })
-        return [...commons, ...uncommons, ...rares]
-    }
-
-    function selectCards({ pool, targetRarity, total }) {
-        let cards = []
-        for (let i = 0; i < total; i++) {
-            const card = cardSelector.select({
-                pool,
-                colorWeights,
-                totalWeight,
-                targetRarity,
-            })
-            cards.push(card)
-        }
-        return cards
+function CardsCollection({ set }) {
+    function pick(constraint) {
+        return set.filter(constraint)
     }
 
     return Object.freeze({
-        generate,
+        pick,
     })
 }
 
