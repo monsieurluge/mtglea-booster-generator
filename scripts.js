@@ -17,6 +17,7 @@ function BoosterGenerator({ cardSelector, total }) {
         for (let n = 0; n < total; n++) {
             pool.push(cardSelector.select({ from, pool }))
         }
+        debugBoosterContent(pool)
         return pool
     }
 
@@ -86,6 +87,18 @@ function RarityRuleset({ rarity, total }) {
     return Object.freeze({
         apply,
     })
+}
+
+function debugBoosterContent(booster) {
+    let rareCount = 0
+    let uncommonCount = 0
+    let commonCount = 0
+    booster.forEach(card => {
+        if (card.rarity === 'rare') rareCount++
+        if (card.rarity === 'uncommon') uncommonCount++
+        if (card.rarity === 'common') commonCount++
+    })
+    console.log(`${rareCount} rares, ${uncommonCount} uncommon, ${commonCount} common`)
 }
 
 // UI logic --------------------------------------------------------------------
