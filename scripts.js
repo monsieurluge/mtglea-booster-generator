@@ -2,7 +2,11 @@
 
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
-        ruleset: StrictRuleSet([RarityRule({ rarity: 'rare', total: 1 }), RarityRule({ rarity: 'uncommon', total: 3 }), RarityRule({ rarity: 'common', total: 10 })]),
+        ruleset: StrictRuleset([
+            RarityRuleset({ rarity: 'rare', total: 1 }),
+            RarityRuleset({ rarity: 'uncommon', total: 3 }),
+            RarityRuleset({ rarity: 'common', total: 10 }),
+        ]),
     }),
     total: 14,
 })
@@ -43,9 +47,9 @@ function CardSelector({ ruleset }) {
     })
 }
 
-function StrictRuleSet(rules) {
+function StrictRuleset(rulesets) {
     function apply(cardPool) {
-        const validFilters = rules.map(rule => rule.apply(cardPool)).filter(rule => !rule.isValid)
+        const validFilters = rulesets.map(rule => rule.apply(cardPool)).filter(rule => !rule.isValid)
         if (validFilters.length > 0) {
             return {
                 isValid: true,
@@ -64,7 +68,7 @@ function StrictRuleSet(rules) {
     })
 }
 
-function RarityRule({ rarity, total }) {
+function RarityRuleset({ rarity, total }) {
     function apply(cardPool) {
         const count = cardPool.filter(card => card.rarity === rarity).length
         if (count === total) {
