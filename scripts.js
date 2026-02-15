@@ -11,15 +11,15 @@ const alphaBoosterGenerator = BoosterGenerator({
                 ExactCountRuleset({ filter: rarityIs('uncommon'), total: 3 }),
                 ExactCountRuleset({ filter: rarityIs('common'), total: 10 }),
             ]),
-            LooseRuleset([
-                MinimumCountRuleset({ filter: colorIs('white'), threshold: 2 }),
-                MinimumCountRuleset({ filter: colorIs('blue'), threshold: 2 }),
-                MinimumCountRuleset({ filter: colorIs('black'), threshold: 2 }),
-                MinimumCountRuleset({ filter: colorIs('red'), threshold: 2 }),
-                MinimumCountRuleset({ filter: colorIs('green'), threshold: 2 }),
-                MinimumCountRuleset({ filter: colorIs('artifact'), threshold: 1 }),
-                MinimumCountRuleset({ filter: colorIs('land'), threshold: 1 }),
-            ])
+            ColorWeightRuleset([
+                { color: 'white', weight: 4 },
+                { color: 'blue', weight: 4 },
+                { color: 'black', weight: 4 },
+                { color: 'red', weight: 4 },
+                { color: 'green', weight: 4 },
+                { color: 'artifact', weight: 3 },
+                { color: 'land', weight: 2 },
+            ]),
         ]),
     }),
     total: 14,
@@ -64,8 +64,8 @@ function CardSelector({ ruleset }) {
 function StrictRuleset(rulesets) {
     function apply(cardPool) {
         return card => rulesets
-            .map(ruleset => ruleset.apply(cardPool))
-            .every(filter => filter(card))
+            .map(ruleset => ruleset.apply(cardPool)).
+            every(filter => filter(card))
     }
 
     return Object.freeze({
@@ -78,6 +78,27 @@ function LooseRuleset(rulesets) {
         return card => rulesets
             .map(ruleset => ruleset.apply(cardPool))
             .some(filter => filter(card))
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+function ColorWeightRuleset(distribution) {
+    const total = distribution.reduce((total, item) => total + item.weight, 0)
+
+    function apply(cardPool) {
+        const randomValue = Math.random() * total
+        let chosenColor
+        let cursor = 0
+        for (let i = 0; i < distribution.length; i++) {
+            cursor += distribution[i].weight
+            if (!chosenColor && cursor >= randomValue) {
+                chosenColor = distribution[i].color
+            }
+        }
+        return (card) => card.color === chosenColor
     }
 
     return Object.freeze({
