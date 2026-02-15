@@ -1,18 +1,8 @@
 // Core Logic ------------------------------------------------------------------
 
-const rarityIs = rarity => card => card.rarity === rarity
-
-const isCommon = rarityIs('common')
-const isRare = rarityIs('rare')
-const isUncommon = rarityIs('uncommon')
-
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
-        ruleset: StrictRuleset([
-            BaseRuleset({ filter: isRare, total: 1 }),
-            BaseRuleset({ filter: isUncommon, total: 3 }),
-            BaseRuleset({ filter: isCommon, total: 10 }),
-        ]),
+        ruleset: StrictRuleset([RarityRuleset({ rarity: 'rare', total: 1 }), RarityRuleset({ rarity: 'uncommon', total: 3 }), RarityRuleset({ rarity: 'common', total: 10 })]),
     }),
     total: 14,
 })
@@ -45,7 +35,7 @@ function CardsCollection({ set }) {
 
 function CardSelector({ ruleset }) {
     function select({ from: collection, pool: currentPool }) {
-        const cardFilter = ruleset.apply(currentPool).filter
+        const cardFilter = ruleset.apply(currentPool)
         return collection.pickAtRandom(cardFilter)
     }
 
@@ -56,18 +46,7 @@ function CardSelector({ ruleset }) {
 
 function StrictRuleset(rulesets) {
     function apply(cardPool) {
-        const validFilters = rulesets.map(rule => rule.apply(cardPool)).filter(rule => !rule.isValid)
-        if (validFilters.length > 0) {
-            return {
-                isValid: true,
-                filter: card => validFilters.some(filter => filter.filter(card)),
-            }
-        }
-        // temporary fallback
-        return {
-            isValid: true,
-            filter: () => true,
-        }
+        return card => rulesets.map(ruleset => ruleset.apply(cardPool)).some(filter => filter(card))
     }
 
     return Object.freeze({
@@ -75,19 +54,13 @@ function StrictRuleset(rulesets) {
     })
 }
 
-function BaseRuleset({ filter, total }) {
+function RarityRuleset({ rarity, total }) {
     function apply(cardPool) {
-        const count = cardPool.filter(filter).length
+        const count = cardPool.filter(card => card.rarity === rarity).length
         if (count === total) {
-            return {
-                isValid: true,
-                filter: () => true,
-            }
+            return () => false
         }
-        return {
-            isValid: false,
-            filter,
-        }
+        return card => card.rarity === rarity
     }
 
     return Object.freeze({
