@@ -1,17 +1,25 @@
 // Core Logic ------------------------------------------------------------------
 
+const colorIs = color => card => card.color === color
 const rarityIs = rarity => card => card.rarity === rarity
-
-const isCommon = rarityIs('common')
-const isRare = rarityIs('rare')
-const isUncommon = rarityIs('uncommon')
 
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
-        ruleset: MetaRuleset([
-            StrictCountRuleset({ filter: isRare, total: 1 }),
-            StrictCountRuleset({ filter: isUncommon, total: 3 }),
-            StrictCountRuleset({ filter: isCommon, total: 10 })
+        ruleset: StrictRuleset([
+            LooseRuleset([
+                ExactCountRuleset({ filter: rarityIs('rare'), total: 1 }),
+                ExactCountRuleset({ filter: rarityIs('uncommon'), total: 3 }),
+                ExactCountRuleset({ filter: rarityIs('common'), total: 10 }),
+            ]),
+            LooseRuleset([
+                MinimumCountRuleset({ filter: colorIs('white'), threshold: 2 }),
+                MinimumCountRuleset({ filter: colorIs('blue'), threshold: 2 }),
+                MinimumCountRuleset({ filter: colorIs('black'), threshold: 2 }),
+                MinimumCountRuleset({ filter: colorIs('red'), threshold: 2 }),
+                MinimumCountRuleset({ filter: colorIs('green'), threshold: 2 }),
+                MinimumCountRuleset({ filter: colorIs('artifact'), threshold: 1 }),
+                MinimumCountRuleset({ filter: colorIs('land'), threshold: 1 }),
+            ])
         ]),
     }),
     total: 14,
@@ -23,7 +31,6 @@ function BoosterGenerator({ cardSelector, total }) {
         for (let n = 0; n < total; n++) {
             pool.push(cardSelector.select({ from, pool }))
         }
-        debugBoosterContent(pool)
         return pool
     }
 
@@ -54,7 +61,19 @@ function CardSelector({ ruleset }) {
     })
 }
 
-function MetaRuleset(rulesets) {
+function StrictRuleset(rulesets) {
+    function apply(cardPool) {
+        return card => rulesets
+            .map(ruleset => ruleset.apply(cardPool))
+            .every(filter => filter(card))
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+function LooseRuleset(rulesets) {
     function apply(cardPool) {
         return card => rulesets
             .map(ruleset => ruleset.apply(cardPool))
@@ -66,7 +85,21 @@ function MetaRuleset(rulesets) {
     })
 }
 
-function StrictCountRuleset({ filter, total }) {
+function MinimumCountRuleset({ filter, threshold }) {
+    function apply(cardPool) {
+        const count = cardPool.filter(filter).length
+        if (count > threshold) {
+            return () => false
+        }
+        return filter
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+function ExactCountRuleset({ filter, total }) {
     function apply(cardPool) {
         const count = cardPool.filter(filter).length
         if (count === total) {
@@ -78,18 +111,6 @@ function StrictCountRuleset({ filter, total }) {
     return Object.freeze({
         apply,
     })
-}
-
-function debugBoosterContent(booster) {
-    let rareCount = 0
-    let uncommonCount = 0
-    let commonCount = 0
-    booster.forEach(card => {
-        if (card.rarity === 'rare') rareCount++
-        if (card.rarity === 'uncommon') uncommonCount++
-        if (card.rarity === 'common') commonCount++
-    })
-    console.log(`${rareCount} rares, ${uncommonCount} uncommon, ${commonCount} common`)
 }
 
 // UI logic --------------------------------------------------------------------
