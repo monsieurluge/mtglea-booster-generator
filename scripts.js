@@ -63,7 +63,7 @@ const myCardsCollection = CardsCollection({
 })
 
 const alphaBoosterGenerator = BoosterGenerator({
-    cardSelector: AlphaCardSelector({
+    cardSelector: CardSelector({
         collection: myCardsCollection,
         rule: StrictRuleSet([
             RarityRule({ rarity: 'rare', total: 1 }),
@@ -73,17 +73,6 @@ const alphaBoosterGenerator = BoosterGenerator({
     }),
     total: 14,
 })
-
-function AlphaCardSelector({ collection, rule }) {
-    function select(currentPool) {
-        const cardFilter = rule.apply(currentPool).filter
-        return collection.pickAtRandom(cardFilter)
-    }
-
-    return Object.freeze({
-        select,
-    })
-}
 
 function BoosterGenerator({ cardSelector, total }) {
     function generate() {
@@ -107,6 +96,17 @@ function CardsCollection({ set }) {
 
     return Object.freeze({
         pickAtRandom,
+    })
+}
+
+function CardSelector({ collection, rule }) {
+    function select(currentPool) {
+        const cardFilter = rule.apply(currentPool).filter
+        return collection.pickAtRandom(cardFilter)
+    }
+
+    return Object.freeze({
+        select,
     })
 }
 
