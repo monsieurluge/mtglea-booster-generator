@@ -1,11 +1,17 @@
 // Core Logic ------------------------------------------------------------------
 
+const rarityIs = rarity => card => card.rarity === rarity
+
+const isCommon = rarityIs('common')
+const isRare = rarityIs('rare')
+const isUncommon = rarityIs('uncommon')
+
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
         ruleset: StrictRuleset([
-            RarityRuleset({ rarity: 'rare', total: 1 }),
-            RarityRuleset({ rarity: 'uncommon', total: 3 }),
-            RarityRuleset({ rarity: 'common', total: 10 }),
+            BaseRuleset({ filter: isRare, total: 1 }),
+            BaseRuleset({ filter: isUncommon, total: 3 }),
+            BaseRuleset({ filter: isCommon, total: 10 }),
         ]),
     }),
     total: 14,
@@ -69,9 +75,9 @@ function StrictRuleset(rulesets) {
     })
 }
 
-function RarityRuleset({ rarity, total }) {
+function BaseRuleset({ filter, total }) {
     function apply(cardPool) {
-        const count = cardPool.filter(card => card.rarity === rarity).length
+        const count = cardPool.filter(filter).length
         if (count === total) {
             return {
                 isValid: true,
@@ -80,7 +86,7 @@ function RarityRuleset({ rarity, total }) {
         }
         return {
             isValid: false,
-            filter: card => card.rarity === rarity,
+            filter,
         }
     }
 
