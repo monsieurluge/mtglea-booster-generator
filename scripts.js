@@ -8,10 +8,10 @@ const isUncommon = rarityIs('uncommon')
 
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
-        ruleset: StrictRuleset([
-            GenericRuleset({ filter: isRare, total: 1 }),
-            GenericRuleset({ filter: isUncommon, total: 3 }),
-            GenericRuleset({ filter: isCommon, total: 10 })
+        ruleset: MetaRuleset([
+            StrictCountRuleset({ filter: isRare, total: 1 }),
+            StrictCountRuleset({ filter: isUncommon, total: 3 }),
+            StrictCountRuleset({ filter: isCommon, total: 10 })
         ]),
     }),
     total: 14,
@@ -54,7 +54,7 @@ function CardSelector({ ruleset }) {
     })
 }
 
-function StrictRuleset(rulesets) {
+function MetaRuleset(rulesets) {
     function apply(cardPool) {
         return card => rulesets
             .map(ruleset => ruleset.apply(cardPool))
@@ -66,7 +66,7 @@ function StrictRuleset(rulesets) {
     })
 }
 
-function GenericRuleset({ filter, total }) {
+function StrictCountRuleset({ filter, total }) {
     function apply(cardPool) {
         const count = cardPool.filter(filter).length
         if (count === total) {
