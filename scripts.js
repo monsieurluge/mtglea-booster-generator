@@ -1,6 +1,90 @@
-// UI logic --------------------------------------------------------------------
+// Core Logic ------------------------------------------------------------------
 
-window.addEventListener('DOMContentLoaded', generateAlphaBoosters)
+const alphaBoosterGenerator = BoosterGenerator({
+    cardSelector: CardSelector({
+        ruleset: StrictRuleSet([RarityRule({ rarity: 'rare', total: 1 }), RarityRule({ rarity: 'uncommon', total: 3 }), RarityRule({ rarity: 'common', total: 10 })]),
+    }),
+    total: 14,
+})
+
+function BoosterGenerator({ cardSelector, total }) {
+    function generate({ from }) {
+        let pool = []
+        for (let n = 0; n < total; n++) {
+            pool.push(cardSelector.select({ from, pool }))
+        }
+        return pool
+    }
+
+    return Object.freeze({
+        generate,
+    })
+}
+
+function CardsCollection({ set }) {
+    function pickAtRandom(constraint) {
+        const cards = set.filter(constraint)
+        return cards[Math.floor(Math.random() * cards.length)]
+    }
+
+    return Object.freeze({
+        pickAtRandom,
+    })
+}
+
+function CardSelector({ ruleset }) {
+    function select({ from: collection, pool: currentPool }) {
+        const cardFilter = ruleset.apply(currentPool).filter
+        return collection.pickAtRandom(cardFilter)
+    }
+
+    return Object.freeze({
+        select,
+    })
+}
+
+function StrictRuleSet(rules) {
+    function apply(cardPool) {
+        const validFilters = rules.map(rule => rule.apply(cardPool)).filter(rule => !rule.isValid)
+        if (validFilters.length > 0) {
+            return {
+                isValid: true,
+                filter: card => validFilters.some(filter => filter.filter(card)),
+            }
+        }
+        // temporary fallback
+        return {
+            isValid: true,
+            filter: () => true,
+        }
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+function RarityRule({ rarity, total }) {
+    function apply(cardPool) {
+        const count = cardPool.filter(card => card.rarity === rarity).length
+        if (count === total) {
+            return {
+                isValid: true,
+                filter: () => true,
+            }
+        }
+        return {
+            isValid: false,
+            filter: card => card.rarity === rarity,
+        }
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+// UI logic --------------------------------------------------------------------
 
 const domElements = {
     boosters: document.getElementById('boosters'),
@@ -44,112 +128,18 @@ function createManaSymbolElement(symbol) {
 }
 
 function generateAlphaBoosters() {
-    const count = parseInt(domElements.boostersCount.value, 10) || 3
     const boosters = []
+    const count = parseInt(domElements.boostersCount.value, 10) || 3
+    const myCardsCollection = CardsCollection({
+        set: alphaSet(),
+    })
     for (let i = 0; i < count; i++) {
-        boosters.push(alphaBoosterGenerator.generate())
+        boosters.push(alphaBoosterGenerator.generate({ from: myCardsCollection }))
     }
     domElements.boosters.innerHTML = ''
     boosters.forEach(booster => {
         const element = createBoosterElement(booster)
         domElements.boosters.appendChild(element)
-    })
-}
-
-// Core Logic ------------------------------------------------------------------
-
-const myCardsCollection = CardsCollection({
-    set: alphaSet(),
-})
-
-const alphaBoosterGenerator = BoosterGenerator({
-    cardSelector: CardSelector({
-        collection: myCardsCollection,
-        rule: StrictRuleSet([
-            RarityRule({ rarity: 'rare', total: 1 }),
-            RarityRule({ rarity: 'uncommon', total: 3 }),
-            RarityRule({ rarity: 'common', total: 10 }),
-        ]),
-    }),
-    total: 14,
-})
-
-function BoosterGenerator({ cardSelector, total }) {
-    function generate() {
-        let pool = []
-        for (let n = 0; n < total; n++) {
-            pool.push(cardSelector.select(pool))
-        }
-        return pool
-    }
-
-    return Object.freeze({
-        generate,
-    })
-}
-
-function CardsCollection({ set }) {
-    function pickAtRandom(constraint) {
-        const cards = set.filter(constraint)
-        return cards[Math.floor(Math.random() * cards.length)]
-    }
-
-    return Object.freeze({
-        pickAtRandom,
-    })
-}
-
-function CardSelector({ collection, rule }) {
-    function select(currentPool) {
-        const cardFilter = rule.apply(currentPool).filter
-        return collection.pickAtRandom(cardFilter)
-    }
-
-    return Object.freeze({
-        select,
-    })
-}
-
-function StrictRuleSet(rules) {
-    function apply(cardPool) {
-        const validFilters = rules
-            .map(rule => rule.apply(cardPool))
-            .filter(rule => !rule.isValid)
-        if (validFilters.length > 0) {
-            return {
-                isValid: true,
-                filter: card => validFilters.some(filter => filter.filter(card)),
-            }
-        }
-        // temporary fallback
-        return {
-            isValid: true,
-            filter: () => true,
-        }
-    }
-
-    return Object.freeze({
-        apply,
-    })
-}
-
-function RarityRule({ rarity, total }) {
-    function apply(cardPool) {
-        const count = cardPool.filter(card => card.rarity === rarity).length
-        if (count === total) {
-            return {
-                isValid: true,
-                filter: () => true,
-            }
-        }
-        return {
-            isValid: false,
-            filter: card => card.rarity === rarity,
-        }
-    }
-
-    return Object.freeze({
-        apply,
     })
 }
 
