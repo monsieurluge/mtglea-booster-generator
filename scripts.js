@@ -65,21 +65,19 @@ const myCardsCollection = CardsCollection({
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: AlphaCardSelector({
         collection: myCardsCollection,
-        rules: [RarityRule({ rarity: 'rare', total: 1 }), RarityRule({ rarity: 'uncommon', total: 3 }), RarityRule({ rarity: 'common', total: 10 })],
+        rule: StrictRuleSet([
+            RarityRule({ rarity: 'rare', total: 1 }),
+            RarityRule({ rarity: 'uncommon', total: 3 }),
+            RarityRule({ rarity: 'common', total: 10 }),
+        ]),
     }),
     total: 14,
 })
 
-function AlphaCardSelector({ collection, rules }) {
+function AlphaCardSelector({ collection, rule }) {
     function select(currentPool) {
-        const filters = card => {
-            const validFilters = rules.map(rule => rule.apply(currentPool)).filter(rule => !rule.isValid)
-            if (validFilters.length > 0) {
-                return validFilters.some(filter => filter.filter(card))
-            }
-            return () => true
-        }
-        return collection.pickAtRandom(filters)
+        const cardFilter = rule.apply(currentPool).filter
+        return collection.pickAtRandom(cardFilter)
     }
 
     return Object.freeze({
@@ -109,6 +107,29 @@ function CardsCollection({ set }) {
 
     return Object.freeze({
         pickAtRandom,
+    })
+}
+
+function StrictRuleSet(rules) {
+    function apply(cardPool) {
+        const validFilters = rules
+            .map(rule => rule.apply(cardPool))
+            .filter(rule => !rule.isValid)
+        if (validFilters.length > 0) {
+            return {
+                isValid: true,
+                filter: card => validFilters.some(filter => filter.filter(card)),
+            }
+        }
+        // temporary fallback
+        return {
+            isValid: true,
+            filter: () => true,
+        }
+    }
+
+    return Object.freeze({
+        apply,
     })
 }
 
