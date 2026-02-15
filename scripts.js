@@ -66,6 +66,7 @@ const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: AlphaCardSelector({
         collection: myCardsCollection,
         maxAttempts: 10,
+        rules: [RarityRule({ rarity: 'rare', total: 1 }), RarityRule({ rarity: 'uncommon', total: 3 }), RarityRule({ rarity: 'common', total: 11 })],
     }),
     stats: {
         colorDistribution: {
@@ -85,7 +86,21 @@ const alphaBoosterGenerator = BoosterGenerator({
     },
 })
 
-function AlphaCardSelector({ collection, maxAttempts }) {
+function RarityRule({ rarity, total }) {
+    function apply(cardPool) {
+        const count = cardPool.filter(card => card.rarity === rarity).length
+        if (count === total) {
+            return () => true
+        }
+        return card => card.rarity === rarity
+    }
+
+    return Object.freeze({
+        apply,
+    })
+}
+
+function AlphaCardSelector({ collection, maxAttempts, rules }) {
     const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
 
     function select({ colorWeights, totalWeight, targetRarity }) {
@@ -118,19 +133,27 @@ function BoosterGenerator({ cardSelector, stats }) {
     const totalWeight = colorWeights.reduce((a, b) => a + b, 0)
 
     function generate() {
+        let pool = []
+
         const commons = selectCards({
             targetRarity: 'common',
             total: stats.rarityDistribution.common,
         })
+        pool = [...pool, ...commons]
+
         const uncommons = selectCards({
             targetRarity: 'uncommon',
             total: stats.rarityDistribution.uncommon,
         })
+        pool = [...pool, ...uncommons]
+
         const rares = selectCards({
             targetRarity: 'rare',
             total: stats.rarityDistribution.rare,
         })
-        return [...commons, ...uncommons, ...rares]
+        pool = [...pool, ...rares]
+
+        return pool
     }
 
     function selectCards({ targetRarity, total }) {
