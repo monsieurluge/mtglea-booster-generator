@@ -1,8 +1,18 @@
 // Core Logic ------------------------------------------------------------------
 
+const rarityIs = rarity => card => card.rarity === rarity
+
+const isCommon = rarityIs('common')
+const isRare = rarityIs('rare')
+const isUncommon = rarityIs('uncommon')
+
 const alphaBoosterGenerator = BoosterGenerator({
     cardSelector: CardSelector({
-        ruleset: StrictRuleset([RarityRuleset({ rarity: 'rare', total: 1 }), RarityRuleset({ rarity: 'uncommon', total: 3 }), RarityRuleset({ rarity: 'common', total: 10 })]),
+        ruleset: StrictRuleset([
+            GenericRuleset({ filter: isRare, total: 1 }),
+            GenericRuleset({ filter: isUncommon, total: 3 }),
+            GenericRuleset({ filter: isCommon, total: 10 })
+        ]),
     }),
     total: 14,
 })
@@ -46,7 +56,9 @@ function CardSelector({ ruleset }) {
 
 function StrictRuleset(rulesets) {
     function apply(cardPool) {
-        return card => rulesets.map(ruleset => ruleset.apply(cardPool)).some(filter => filter(card))
+        return card => rulesets
+            .map(ruleset => ruleset.apply(cardPool))
+            .some(filter => filter(card))
     }
 
     return Object.freeze({
@@ -54,13 +66,13 @@ function StrictRuleset(rulesets) {
     })
 }
 
-function RarityRuleset({ rarity, total }) {
+function GenericRuleset({ filter, total }) {
     function apply(cardPool) {
-        const count = cardPool.filter(card => card.rarity === rarity).length
+        const count = cardPool.filter(filter).length
         if (count === total) {
             return () => false
         }
-        return card => card.rarity === rarity
+        return filter
     }
 
     return Object.freeze({
