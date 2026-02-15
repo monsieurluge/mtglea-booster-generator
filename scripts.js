@@ -1,9 +1,62 @@
+// UI logic --------------------------------------------------------------------
+
 window.addEventListener('DOMContentLoaded', generateAlphaBoosters)
 
 const domElements = {
     boosters: document.getElementById('boosters'),
     boostersCount: document.getElementById('booster-count'),
 }
+
+function createBoosterElement(cards) {
+    const listEl = document.createElement('ul')
+    cards.forEach(card => {
+        listEl.appendChild(createCardElement({ ...card }))
+    })
+    const boosterEl = document.createElement('div')
+    boosterEl.classList.add('booster')
+    boosterEl.appendChild(listEl)
+    return boosterEl
+}
+
+function createCardElement({ color, cost, name }) {
+    const template = document.querySelector('#card-template')
+    const clone = document.importNode(template.content, true)
+    const boxEl = clone.querySelector('.card-box')
+    boxEl.classList.add(`color-${color}`)
+    const costEl = clone.querySelector('.card-cost')
+    createManaSymbolElements(cost).forEach(symbolEl => costEl.appendChild(symbolEl))
+    const nameEl = clone.querySelector('.card-name')
+    nameEl.textContent = name
+    return clone
+}
+
+function createManaSymbolElements(cost) {
+    const regex = /{([^}]+)}/g
+    return [...cost.matchAll(regex)].map(match => createManaSymbolElement(match[1]))
+}
+
+function createManaSymbolElement(symbol) {
+    const template = document.querySelector('#mana-symbol')
+    const clone = document.importNode(template.content, true)
+    const symbolEl = clone.querySelector('.mana-symbol')
+    symbolEl.classList.add(`s${symbol.toLowerCase()}`)
+    return symbolEl
+}
+
+function generateAlphaBoosters() {
+    const count = parseInt(domElements.boostersCount.value, 10) || 3
+    const boosters = []
+    for (let i = 0; i < count; i++) {
+        boosters.push(alphaBoosterGenerator.generate())
+    }
+    domElements.boosters.innerHTML = ''
+    boosters.forEach(booster => {
+        const element = createBoosterElement(booster)
+        domElements.boosters.appendChild(element)
+    })
+}
+
+// Core Logic ------------------------------------------------------------------
 
 const myCardsCollection = CardsCollection({
     set: alphaSet(),
@@ -31,6 +84,34 @@ const alphaBoosterGenerator = BoosterGenerator({
         },
     },
 })
+
+function AlphaCardSelector({ collection, maxAttempts }) {
+    const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
+
+    function select({ colorWeights, totalWeight, targetRarity }) {
+        let attempt = 0
+        while (attempt < maxAttempts) {
+            attempt += 1
+            const rand = Math.random() * totalWeight
+            let cumulativeWeight = 0
+            let selectedColor
+            for (let i = 0; i < colors.length; i++) {
+                cumulativeWeight += colorWeights[i]
+                if (rand < cumulativeWeight) {
+                    selectedColor = colors[i]
+                    break
+                }
+            }
+            const card = collection.pickAtRandom(card => card.rarity === targetRarity && card.color === selectedColor)
+            if (card) return card
+        }
+        throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
+    }
+
+    return Object.freeze({
+        select,
+    })
+}
 
 function BoosterGenerator({ cardSelector, stats }) {
     const colorWeights = Object.values(stats.colorDistribution)
@@ -70,34 +151,6 @@ function BoosterGenerator({ cardSelector, stats }) {
     })
 }
 
-function AlphaCardSelector({ collection, maxAttempts }) {
-    const colors = ['white', 'blue', 'black', 'red', 'green', 'artifact', 'land']
-
-    function select({ colorWeights, totalWeight, targetRarity }) {
-        let attempt = 0
-        while (attempt < maxAttempts) {
-            attempt += 1
-            const rand = Math.random() * totalWeight
-            let cumulativeWeight = 0
-            let selectedColor
-            for (let i = 0; i < colors.length; i++) {
-                cumulativeWeight += colorWeights[i]
-                if (rand < cumulativeWeight) {
-                    selectedColor = colors[i]
-                    break
-                }
-            }
-            const card = collection.pickAtRandom(card => card.rarity === targetRarity && card.color === selectedColor)
-            if (card) return card
-        }
-        throw new Error(`Failed to select a ${targetRarity} card after ${maxAttempts} attempts`)
-    }
-
-    return Object.freeze({
-        select,
-    })
-}
-
 function CardsCollection({ set }) {
     function pickAtRandom(constraint) {
         const cards = set.filter(constraint)
@@ -109,54 +162,7 @@ function CardsCollection({ set }) {
     })
 }
 
-function generateAlphaBoosters() {
-    const count = parseInt(domElements.boostersCount.value, 10) || 3
-    const boosters = []
-    for (let i = 0; i < count; i++) {
-        boosters.push(alphaBoosterGenerator.generate())
-    }
-    domElements.boosters.innerHTML = ''
-    boosters.forEach(booster => {
-        const element = createBoosterElement(booster)
-        domElements.boosters.appendChild(element)
-    })
-}
-
-function createBoosterElement(cards) {
-    const listEl = document.createElement('ul')
-    cards.forEach(card => {
-        listEl.appendChild(createCardElement({ ...card }))
-    })
-    const boosterEl = document.createElement('div')
-    boosterEl.classList.add('booster')
-    boosterEl.appendChild(listEl)
-    return boosterEl
-}
-
-function createCardElement({ color, cost, name }) {
-    const template = document.querySelector('#card-template')
-    const clone = document.importNode(template.content, true)
-    const boxEl = clone.querySelector('.card-box')
-    boxEl.classList.add(`color-${color}`)
-    const costEl = clone.querySelector('.card-cost')
-    createManaSymbolElements(cost).forEach(symbolEl => costEl.appendChild(symbolEl))
-    const nameEl = clone.querySelector('.card-name')
-    nameEl.textContent = name
-    return clone
-}
-
-function createManaSymbolElements(cost) {
-    const regex = /{([^}]+)}/g
-    return [...cost.matchAll(regex)].map(match => createManaSymbolElement(match[1]))
-}
-
-function createManaSymbolElement(symbol) {
-    const template = document.querySelector('#mana-symbol')
-    const clone = document.importNode(template.content, true)
-    const symbolEl = clone.querySelector('.mana-symbol')
-    symbolEl.classList.add(`s${symbol.toLowerCase()}`)
-    return symbolEl
-}
+// Data ------------------------------------------------------------------------
 
 function alphaSet() {
     return [
